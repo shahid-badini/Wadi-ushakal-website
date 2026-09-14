@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Wadi Nushakal | UAE Transport &amp; Logistics</title>
+    <!-- Per-page title, description, canonical URL and share text are set by each page (src/lib/head.js) -->
+    <meta name="theme-color" content="#f5f5f5" />
+    <meta name="color-scheme" content="light" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/manrope-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Wadi Nushakal" />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Wadi Nushakal — Your Cargo, Our Commitment." />
+    <meta property="og:locale" content="en_AE" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg" />
+
+    <!-- Lets CSS enable scroll animations only when JavaScript runs.
+         Safety net: if the app script fails to load, fall back to the no-JS view so content is never left hidden. -->
+    <script>
+      document.documentElement.classList.replace('no-js', 'js');
+      setTimeout(function () {
+        if (!window.__wnReady) document.documentElement.classList.replace('js', 'no-js');
+      }, 4000);
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Wadi Nushakal",
+        "description": "Wadi Nushakal provides professional transport and logistics solutions in the UAE, delivering cargo with reliability, safety and commitment.",
+        "url": "%VITE_SITE_URL%/",
+        "image": "%VITE_SITE_URL%/og-image.jpg",
+        "email": "innfo@wadinushakal.comm",
+        "telephone": "+97125572890",
+        "slogan": "Your Cargo, Our Commitment.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Beda Zayed Industrial Area, Near Big Mart, No. A11",
+          "addressLocality": "Al Dhafra",
+          "addressRegion": "Abu Dhabi",
+          "addressCountry": "AE"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <!-- Local-dev helper. Opened without Vite (VS Code "Go Live" / Live Server, or double-clicking this file) the app
+         can't run and the page used to stay blank. Explains how to start it, and jumps to the dev server once it's up.
+         Does nothing under `npm run dev` or on the built site (#app is pre-rendered there). -->
+    <script>
+      (function () {
+        if (document.getElementById('app').firstElementChild || document.querySelector('script[src="/@vite/client"]')) return;
+        var dev = 'http://127.0.0.1:5173/';
+        var box = document.createElement('div');
+        box.setAttribute('style', 'max-width:34rem;margin:12vh auto;padding:2rem;font:16px/1.6 system-ui,sans-serif;color:#1d2733;background:#fff;border:1px solid #d9e2ec;border-radius:12px');
+        box.innerHTML =
+          '<h1 style="margin:0 0 .5rem;font-size:1.35rem;color:#2F6497">Website yahan se nahi chalegi</h1>' +
+          '<p style="margin:0 0 1rem">Ye source file hai, ise seedha nahi khol sakte (isi liye screen white thi).</p>' +
+          '<ol style="margin:0 0 1rem;padding-left:1.25rem"><li>VS Code mein project folder kholein aur neeche <b>Go Live</b> dabayein</li>' +
+          '<li>Ya Terminal mein <code>npm run dev</code> chala kar kholein: <a href="' + dev + '" style="color:#2F6497">' + dev + '</a></li></ol>' +
+          '<p style="margin:0;color:#5a6776;font-size:.9rem">Dev server chalte hi ye page khud wahan chala jayega.</p>';
+        document.body.appendChild(box);
+        (function check() {
+          fetch(dev + '@vite/client', { mode: 'no-cors', cache: 'no-store' }).then(
+            function () { location.replace(dev); },
+            function () { setTimeout(check, 2000); }
+          );
+        })();
+      })();
+    </script>
+  </body>
+</html>

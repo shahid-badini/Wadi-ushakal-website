@@ -1,0 +1,22 @@
+# Image credits
+
+All photographs are sourced from Unsplash and used under the Unsplash License (https://unsplash.com/license).
+Replace with the company's own fleet photography when available.
+
+- about-desert-road.jpg (Sheikh Zayed Road, Dubai) — Photo by @nickverm on Unsplash (https://unsplash.com/photos/LbPd1Wo_qOE)
+- about-tanker-mountain.jpg (tipper truck, Dubai) — Photo by @luanfonsecavisuals on Unsplash (https://unsplash.com/photos/peVKQQ2w-lg)
+- service-cargo.jpg — Photo by @moroccopictures on Unsplash (https://unsplash.com/photos/MBrx_brVXTY)
+- service-heavy.jpg — Photo by @ajitsandhu on Unsplash (https://unsplash.com/photos/l0WRR2U7lWg)
+- service-general.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/Hk0oOoaCf7Y)
+- service-commercial.jpg — Photo by @rcastro40 on Unsplash (https://unsplash.com/photos/RwO3Atn-RbQ)
+- service-local.jpg (UAE highway) — Photo by @msa_ae on Unsplash (https://unsplash.com/photos/MopMPlA1mf4)
+- fleet-cargo.jpg — Photo by @aban_pics on Unsplash (https://unsplash.com/photos/s3xgOyWfRsA)
+- fleet-heavy.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/D_nWwfbSNH8)
+- fleet-commercial.jpg — Photo by @nxvision on Unsplash (https://unsplash.com/photos/GOD2mDNujuU)
+- fleet-logistics.jpg — Photo by @portcalls on Unsplash (https://unsplash.com/photos/JZ0IIWzB52c)
+- hero-logistics.jpg (heavy cargo truck under a flyover with a freight aircraft overhead and stacked containers
+  behind — the hero background, used exactly as supplied, with no crop or colour edit; all framing and tone is
+  done in CSS) — Photo by Tsuyoshi Kozu on Unsplash (https://unsplash.com/photos/NZ53--9-iXo)
+- hero-road.jpg (clean, sharp shot of a small white cargo/delivery truck on a street — the previous hero background) —
+  Photo by @brunafisantos on Unsplash (https://unsplash.com/photos/22zfQm4GMQI)
+- uae-desert.jpg (Burj Khalifa and highways, Dubai) — Photo by @david__r on Unsplash (https://unsplash.com/photos/Fr6zexbmjmc)

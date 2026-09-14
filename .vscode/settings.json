@@ -1,0 +1,8 @@
+{
+  // "Go Live" (Live Server) serves the built site in dist/ — the raw index.html needs Vite and shows a blank page.
+  // dist/ is rebuilt automatically on every save by the "Wadi Nushakal: auto build" task (npm run watch).
+  "liveServer.settings.root": "/dist",
+  "liveServer.settings.wait": 1200,
+  "liveServer.settings.CustomBrowser": "chrome",
+  "livePreview.serverRoot": "/dist"
+}

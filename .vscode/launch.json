@@ -1,0 +1,15 @@
+{
+  // F5 → starts the Vite dev server and opens the site in Chrome.
+  // (Don't use "Go Live" / Live Server: it can't run the Vue app and shows a blank page.)
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Wadi Nushakal (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Wadi Nushakal: dev server"
+    }
+  ]
+}
