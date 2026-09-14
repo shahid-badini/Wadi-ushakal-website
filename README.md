@@ -76,9 +76,9 @@ public/                   ← favicon, touch icon, og-image.jpg, robots.txt, fon
   Sections then choose their own layout: left-aligned copy, two columns, grids. Nothing is centred by default.
 - Header: logo on the left, navigation in the centre, "Get a Quote" on the right. Below 1100px the navigation moves
   into the hamburger menu.
-- Hero: copy on the left on the plain background, the photograph in a panel on the right (from 46%) with the
-  contact panel over it. On tablets and phones the copy sits above the photo, which fills the lower part of the
-  section. No text is ever laid over the photograph, so it needs no overlay.
+- Hero: a full-bleed cinematic scene with the copy on the left and the truck, the logistics route and the
+  status panel on the right; the left third of the scene is deepened so the copy reads over it. On tablets and
+  phones the copy comes first with the truck below it, and the logistics layer is dropped. See *Hero*.
 - Type scale tokens: `--fs-hero`, `--fs-h2`, `--fs-h3`, `--fs-lead` at the top of `global.css`.
 
 ## Brand colours & theme
@@ -114,43 +114,47 @@ third-party form service (Formspree, Basin…) can be wired into `onSubmit` in `
 
 ## Hero
 
-The hero is the owner's own photograph of a cargo truck (`hero-logistics.jpg`), used exactly as delivered — no
-crop, no colour edit. It is shown in a panel filling the right-hand side (`.hero__bg`, `inset: 0 0 0 46%`,
-rounded on its left edge) with `object-position: 58% 64%` framing the truck and the containers. **Nothing is laid
-over it** — no overlay, wash or fade — because the copy sits to its left on the plain page background, and
-`.hero__content` is capped at `min(40rem, 42vw)` so no line of text can reach the photo. The only treatment is a
-light `contrast(1.04) saturate(1.04)`, which suits the bright overcast sky and the site's light theme. On tablets
-and phones the photo moves to the lower part of the hero (56%, and 50% on small phones) with a lower crop, and
-the copy again sits above it on the plain background.
+The hero recreates the reference artwork the owner supplied — cinematic UAE highway at sunset, the cargo
+truck large and to the right, the copy on the left, a glowing logistics route and a smart-logistics panel —
+but built as layers, not as that flat image.
 
-Over the photo sits one substantial panel (`.hero__panel`) rather than a scatter of small cards: the phone number
-as a `tel:` link, the base in Al Dhafra, the transport types and a "Request a quote" link, on white glass with a
-soft shadow. It is hidden below `1100px`, where the copy needs the full width and the contact details are a tap
-away in the menu.
+**Background.** `hero-scene-wide.png` is the owner's artwork cropped to the scene alone (crop x 640-1672,
+y 330-941 of `hero-scene.png`, which is kept unchanged as the source), so the truck, highway, sky and
+skyline are in frame and the artwork's own headline, logo, buttons and panel are outside it. It is full-bleed
+(`.hero__art`, `inset: 0`, `object-position: 56% 66%`) with two gradients over it: a directional wash that
+deepens the left third behind the copy, and a closure along the bottom into the light page below. No white
+overlay anywhere.
 
-The animated smart-logistics overlay and the three floating HUD cards were **removed from the hero** at the
-owner's request. `HeroAiLayer.vue` and `src/lib/hud.js` are still in the repository but nothing imports them, so
-they are not shipped. `scratchpad/measure-hero.mjs` (session-local) checks that the contact panel never touches
-the copy, the header or the ticker, and that no HUD or overlay markup has crept back in. **The Three.js scene is no longer loaded**, so `three` is not shipped in the
-build at all. The files are kept for reference in `src/lib/hero/` (`scene.js`, `truck.js`, `world.js`, `textures.js`)
-together with `src/lib/hero-loader.js`; nothing imports them. To bring the 3D truck back, import `initHeroScene` in
-`HeroSection.vue` again and add a `<div class="hero__stage" data-hero-stage>` for the canvas. What that scene does, for
-reference:
+**Copy.** Everything readable is the site's own markup — eyebrow, a real `<h1>`, tagline, supporting line,
+two real links ("Get a Quote" to `/contact`, "Explore Our Services" to `#services`) and the trust row. Left
+aligned, never centred, capped so it stays out of the truck. The headline is deliberately smaller than the
+global `--fs-hero` (`clamp(2rem, 1.35rem + 2.1vw, 3.35rem)`).
 
-- Loaded with a dynamic `import()` after the page has loaded and the browser is idle, so it never blocks first paint.
-- Setup runs in short steps that yield to the browser, so the page stays responsive while it loads.
-- Resolution capped at 1.25×. If frames slow down, it lowers resolution further, then drops to 30 fps, and finally
-  shows a still frame, so it never stutters.
-- Renders at half rate while the page is being scrolled, so scrolling stays smooth.
-- Pauses when off-screen or when the tab is hidden, and is fully disposed when you navigate to another page.
-- Moving props fade out behind the headline column (a shader mask, not an overlay), so the copy stays readable while
-  the scene remains fully visible.
-- The rest of the page avoids costly effects: no backdrop blur, no SVG filters, and no endlessly animated full-width
-  SVGs. Animations use `transform`/`opacity` only.
-- Skipped when WebGL2 is unavailable, Save-Data is on, or graphics are software-rendered (no GPU). The hero then simply
-  shows the photograph — nothing is missing or blank. Add `?force3d` to the URL to bypass the software check, for
-  example for screenshots.
-- `prefers-reduced-motion`: the scene shows a single still frame, and scroll/CSS animations are disabled.
+**Logistics layer** (`HeroAiLayer.vue`): a glowing route from Abu Dhabi to the destination with GPS pins, a
+vehicle indicator travelling it, data points, a faint digital mesh and a glass status panel (Route Status /
+Cargo / Destination). It is a design element, not live tracking — the drawing is `aria-hidden` and the panel
+is labelled "Illustrative". Coordinates are a 1600 x 900 map of the hero; the route sits in the open sky
+(x 880-1180, y 146-258), clear of the copy, the header capsule and the panel. Hidden below 900px, where the
+sky band is too short for it.
+
+**Colour.** The hero runs on local `--h-*` tokens (light type on the dark scene) so the rest of the site
+stays on the light global palette. The copy, buttons and trust icons use the brand blue; the route, pins,
+destination marker and panel accent use the artwork's gold.
+
+**Header.** Over the hero the bar switches to dark glass (`is-over-hero` in `SiteHeader.vue`: home page,
+not scrolled) with light nav and logo text, and returns to the light glass as soon as the page scrolls or on
+any other page.
+
+**Motion and performance.** Only the logistics layer animates — the route draws, pins pulse, data points and
+the vehicle indicator travel the path, all on transform / opacity / stroke-dashoffset. A full-viewport
+"camera drift" on the image was tried and **removed**: it cost real frames (scroll p95 33ms, 5.3% of frames
+over 25ms) and dropped back to 0.0% without it. Two things the reference implies are not possible from a
+single photograph and are deliberately absent: rotating wheels and suspension travel on the truck (those
+need a 3D model, which was tried earlier, looked cartoonish and was heavy on this machine).
+
+`scratchpad/measure-hero.mjs` (session-local) checks that the scene covers the section, the copy stays in the
+left half and clear of the header, the destination marker and place labels do not clash with the panel,
+header or copy, and that no leftovers from earlier hero versions are in the page.
 
 The UAE map is an **illustrative visual**, not live tracking data, and is captioned accordingly. (The hero's
 dashboard-style overlays, which carried the same caveat, are no longer part of the page.)
@@ -159,8 +163,9 @@ dashboard-style overlays, which carried the same caveat, are no longer part of t
 
 Photos in `src/assets/images/` are realistic Dubai / UAE road, port and truck photos from Unsplash (see
 `src/assets/images/CREDITS.md`), except the hero photograph, which the owner supplied. `hero-logistics.jpg` is
-the one behind the hero — used exactly as delivered, with the framing done in CSS (`object-position`)
-(`hero-road.jpg` is the previous hero photo, kept in case it is wanted back). Note that the glob in
+the owner's reference artwork, and `hero-scene-wide.png` is that same file cropped to the scene alone — the
+crop is what the hero uses (see *Hero*). `hero-logistics.jpg` and `hero-road.jpg` are earlier hero photos,
+kept in case they are wanted back. Note that the glob in
 `src/data/images.js` is eager, so every `.jpg` in that folder is processed at build time whether it is used or
 not — delete an image once nothing references it. To replace one, keep the same file name, or add a new `.jpg` and reference its name
 (without extension) in `src/data/site.js`. For fleet photos, `focus` in `site.js` sets which part of the photo stays in

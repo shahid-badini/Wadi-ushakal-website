@@ -1,30 +1,22 @@
 <script setup>
 /*
- * Smart-logistics layer drawn over the hero photograph: a glowing route across the scene, GPS-style nodes,
- * a destination marker, data points travelling along the route and a few holographic readouts.
+ * Smart-logistics layer over the hero scene: a glowing route from Abu Dhabi to the destination, GPS pins,
+ * a vehicle indicator travelling the route, data points and a floating status panel.
  *
- * It is illustrative, not live tracking data, so the whole layer is aria-hidden.
- * Everything animates with transform / opacity / stroke-dashoffset only, so it stays on the GPU compositor
- * (the hero has to hold 60 fps on an integrated GPU).
+ * It is a design element, not live tracking data, so the drawing is aria-hidden and the panel is labelled
+ * as illustrative. Everything animates with transform / opacity / stroke-dashoffset only, so it stays on
+ * the GPU compositor — the hero has to hold 60 fps on an integrated GPU.
+ *
+ * Coordinates are a 1600 x 900 map of the hero, stretched over it. The route lives in the open sky above
+ * the truck, to the right of the copy (which ends around x 760) and left of the panel (which starts at
+ * about x 1280).
  */
-/* Coordinates live in a 1600 x 900 viewBox stretched over the photo, which is now full-bleed behind the
-   whole hero (aspect 1.5 - 1.78 across desktop widths), so the stretch stays mild and circles read as round.
-   Everything is kept inside the band of open sky that no other element uses: x 470-1150, y 120-340 —
-   right of the hero copy (the headline ends at x 432 of 900, i.e. 768 of 1600... measured per width below),
-   left of the "Shipment" card (starts x 634 of 900 = 1127 of 1600) and above the tagline. */
-/* The route runs through the open sky / treeline above the truck and ends at a destination marker ahead of it,
-   so it never sits on the vehicle itself: the truck fills x 104-644 of the panel at every width, the HUD cards
-   take the space to its right and the hero copy the space to its left, leaving the band above the cargo box
-   (its top edge is y 321 at 1920, lower at narrower widths) as the only clear run across the photo.
-   The run has to clear the headline, which reaches x 768 (of 1600) at the narrowest desktop width, and stop
-   before the "Shipment" card, whose left edge sits at x 1127; the marker's outermost ring is 47 units wide. */
-const ROUTE = 'M800 300 C 880 262, 960 205, 1040 168';
+const ROUTE = 'M880 258 C 960 205, 1030 172, 1100 158 S 1160 156, 1180 146';
 const NODES = [
-  { x: 800, y: 300, label: 'Pickup' },
-  { x: 885, y: 256, label: null },
-  { x: 968, y: 203, label: 'In transit' },
+  { x: 880, y: 258 },
+  { x: 1100, y: 158 },
 ];
-const PARTICLES = [0, 1, 2, 3];
+const PARTICLES = [0, 1, 2];
 </script>
 
 <template>
@@ -32,65 +24,82 @@ const PARTICLES = [0, 1, 2, 3];
     <svg class="ai__svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
       <defs>
         <linearGradient id="ai-route" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stop-color="#4a83b8" stop-opacity="0.25" />
-          <stop offset="0.45" stop-color="#38bdf8" stop-opacity="0.95" />
-          <stop offset="1" stop-color="#818cf8" stop-opacity="0.9" />
+          <stop offset="0" stop-color="#f0a02a" stop-opacity="0.25" />
+          <stop offset="0.45" stop-color="#ffb84d" stop-opacity="0.95" />
+          <stop offset="1" stop-color="#ffd089" stop-opacity="0.9" />
         </linearGradient>
         <radialGradient id="ai-node">
-          <stop offset="0" stop-color="#e8f6ff" />
-          <stop offset="1" stop-color="#38bdf8" />
+          <stop offset="0" stop-color="#fff3dd" />
+          <stop offset="1" stop-color="#f0a02a" />
         </radialGradient>
       </defs>
 
-      <!-- network mesh behind the route -->
+      <!-- faint digital map behind the route -->
       <g class="ai__mesh">
-        <path d="M800 300 L885 256 L968 203 L1040 168" />
-        <path d="M800 300 L900 150 L1040 168" />
-        <path d="M885 256 L950 310 L1040 168" />
+        <path d="M880 258 L1010 205 L1100 158 L1180 146" />
+        <path d="M880 258 L1000 130 L1180 146" />
+        <path d="M1100 158 L1140 220 L1180 146" />
       </g>
 
       <!-- the route: a dashed track with a bright line drawing along it -->
       <path class="ai__track" :d="ROUTE" />
       <path class="ai__line" :d="ROUTE" pathLength="1" />
 
-      <!-- data points running along the route -->
+      <!-- data points travelling the route -->
       <g class="ai__flow">
-        <circle v-for="p in PARTICLES" :key="p" class="ai__dot" :style="{ '--i': p }" r="3.4">
-          <animateMotion :dur="`${6 + p * 0.4}s`" repeatCount="indefinite" :begin="`${p * 1.5}s`" :path="ROUTE" />
+        <circle v-for="p in PARTICLES" :key="p" class="ai__dot" :style="{ '--i': p }" r="4">
+          <animateMotion :dur="`${7 + p * 0.6}s`" repeatCount="indefinite" :begin="`${p * 2.2}s`" :path="ROUTE" />
         </circle>
       </g>
 
-      <!-- GPS nodes -->
+      <!-- the vehicle indicator -->
+      <g class="ai__vehicle">
+        <rect x="-11" y="-7" width="22" height="14" rx="3" />
+        <animateMotion dur="11s" repeatCount="indefinite" :path="ROUTE" rotate="auto" />
+      </g>
+
+      <!-- GPS pins -->
       <g class="ai__nodes">
         <g v-for="(n, i) in NODES" :key="i" :transform="`translate(${n.x} ${n.y})`" :style="{ '--i': i }">
-          <circle class="ai__pulse" r="10" />
-          <circle class="ai__node" r="5" fill="url(#ai-node)" />
+          <circle class="ai__pulse" r="13" />
+          <circle class="ai__node" r="6" fill="url(#ai-node)" />
         </g>
       </g>
 
       <!-- destination marker -->
-      <g class="ai__dest" transform="translate(1040 168)">
-        <circle class="ai__dest-ring" r="18" />
-        <circle class="ai__dest-ring ai__dest-ring--2" r="18" />
-        <path class="ai__pin" d="M0 -20 C 9 -20, 14 -13, 14 -6 C 14 4, 0 16, 0 16 C 0 16, -14 4, -14 -6 C -14 -13, -9 -20, 0 -20 Z" />
-        <circle class="ai__pin-dot" cy="-6" r="4.5" />
+      <g class="ai__dest" transform="translate(1180 146)">
+        <circle class="ai__dest-ring" r="20" />
+        <circle class="ai__dest-ring ai__dest-ring--2" r="20" />
+        <path
+          class="ai__pin"
+          d="M0 -22 C 10 -22, 16 -14, 16 -6 C 16 5, 0 18, 0 18 C 0 18, -16 5, -16 -6 C -16 -14, -10 -22, 0 -22 Z"
+        />
+        <circle class="ai__pin-dot" cy="-6" r="5" />
       </g>
     </svg>
 
-    <!-- holographic readouts, stacked in the gap between the "Shipment" and "Cargo status" cards -->
-    <div class="ai__hud">
-      <div class="ai__chip ai__chip--scan">
-        <span class="ai__scan-dot"></span>
-        <span>Cargo tracking active</span>
-      </div>
-      <div class="ai__chip ai__chip--eta">
-        <span class="ai__chip-label">Route optimised</span>
-        <strong>Al Dhafra → Destination</strong>
-        <span class="ai__readout">
-          <span class="ai__distance">412 km</span>
-          <span class="ai__bar"><span class="ai__bar-fill"></span></span>
-        </span>
-      </div>
+    <!-- place labels -->
+    <span class="ai__place ai__place--from">Abu Dhabi</span>
+    <span class="ai__place ai__place--to">Destination</span>
+
+    <!-- status panel: a design element, not live data -->
+    <div class="ai__panel">
+      <p class="ai__panel-title">Smart Logistics</p>
+      <dl class="ai__panel-list">
+        <div>
+          <dt>Route Status</dt>
+          <dd><span class="ai__dotlight ai__dotlight--live"></span>In Transit</dd>
+        </div>
+        <div>
+          <dt>Cargo</dt>
+          <dd><span class="ai__dotlight ai__dotlight--live"></span>Secure</dd>
+        </div>
+        <div>
+          <dt>Destination</dt>
+          <dd><span class="ai__panel-pin"></span>UAE</dd>
+        </div>
+      </dl>
+      <p class="ai__panel-note">Illustrative</p>
     </div>
   </div>
 </template>
@@ -111,21 +120,21 @@ const PARTICLES = [0, 1, 2, 3];
   overflow: hidden;
 }
 
-/* ---------- network mesh ---------- */
+/* ---------- digital map ---------- */
 .ai__mesh path {
   fill: none;
-  stroke: rgba(56, 189, 248, 0.35);
+  stroke: rgba(240, 160, 42, 0.32);
   stroke-width: 1;
-  stroke-dasharray: 2 9;
+  stroke-dasharray: 2 10;
   vector-effect: non-scaling-stroke;
 }
 
 /* ---------- route ---------- */
 .ai__track {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.45);
-  stroke-width: 2.5;
-  stroke-dasharray: 5 11;
+  stroke: rgba(255, 224, 176, 0.36);
+  stroke-width: 2;
+  stroke-dasharray: 5 12;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
@@ -133,13 +142,12 @@ const PARTICLES = [0, 1, 2, 3];
 .ai__line {
   fill: none;
   stroke: url(#ai-route);
-  stroke-width: 4;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   vector-effect: non-scaling-stroke;
-  filter: none;
-  animation: ai-draw 7s var(--ease-in-out) infinite;
+  animation: ai-draw 11s var(--ease-in-out) infinite;
 }
 
 @keyframes ai-draw {
@@ -152,12 +160,12 @@ const PARTICLES = [0, 1, 2, 3];
   }
 }
 
-/* ---------- data points along the route ---------- */
+/* ---------- data points ---------- */
 .ai__dot {
-  fill: #eaf7ff;
+  fill: #ffe6bd;
   opacity: 0;
-  animation: ai-spark 6s linear infinite;
-  animation-delay: calc(var(--i) * 1.5s);
+  animation: ai-spark 7s linear infinite;
+  animation-delay: calc(var(--i) * 2.2s);
 }
 
 @keyframes ai-spark {
@@ -171,54 +179,62 @@ const PARTICLES = [0, 1, 2, 3];
   }
 }
 
-/* ---------- GPS nodes ---------- */
+/* ---------- vehicle indicator ---------- */
+.ai__vehicle rect {
+  fill: rgba(8, 18, 30, 0.85);
+  stroke: #ffb84d;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---------- GPS pins ---------- */
 .ai__node {
-  stroke: rgba(255, 255, 255, 0.9);
+  stroke: rgba(235, 246, 255, 0.9);
   stroke-width: 1.5;
 }
 
 .ai__pulse {
-  fill: rgba(56, 189, 248, 0.35);
+  fill: rgba(240, 160, 42, 0.32);
   transform-origin: center;
   transform-box: fill-box;
-  animation: ai-pulse 2.8s ease-out infinite;
-  animation-delay: calc(var(--i) * 0.6s);
+  animation: ai-pulse 3s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.8s);
 }
 
 @keyframes ai-pulse {
   0% {
     transform: scale(0.5);
-    opacity: 0.8;
+    opacity: 0.85;
   }
   70%,
   100% {
-    transform: scale(2.4);
+    transform: scale(2.3);
     opacity: 0;
   }
 }
 
 /* ---------- destination ---------- */
 .ai__pin {
-  fill: rgba(47, 100, 151, 0.9);
-  stroke: rgba(232, 246, 255, 0.9);
+  fill: #f0a02a;
+  stroke: rgba(235, 246, 255, 0.9);
   stroke-width: 1.5;
 }
 
 .ai__pin-dot {
-  fill: #eaf7ff;
+  fill: #ffe6bd;
 }
 
 .ai__dest-ring {
   fill: none;
-  stroke: rgba(56, 189, 248, 0.7);
+  stroke: rgba(255, 184, 77, 0.7);
   stroke-width: 1.5;
   transform-origin: center;
   transform-box: fill-box;
-  animation: ai-ping 3s var(--ease-out) infinite;
+  animation: ai-ping 3.4s var(--ease-out) infinite;
 }
 
 .ai__dest-ring--2 {
-  animation-delay: 1.5s;
+  animation-delay: 1.7s;
 }
 
 @keyframes ai-ping {
@@ -232,113 +248,63 @@ const PARTICLES = [0, 1, 2, 3];
   }
 }
 
-/* ---------- holographic readouts ---------- */
-.ai__chip {
-  /* laid out by .ai__hud, which does the positioning */
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.85rem;
-  border-radius: 12px;
-  font-size: 0.72rem;
-  font-weight: 650;
-  color: #eaf7ff;
-  background: linear-gradient(140deg, rgba(9, 24, 43, 0.68) 0%, rgba(9, 24, 43, 0.45) 100%);
-  border: 1px solid rgba(160, 220, 255, 0.4);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 14px 30px -18px rgba(4, 16, 32, 0.9);
+/* ---------- place labels ---------- */
+.ai__place {
+  position: absolute;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #f2f8fd;
+  text-shadow: 0 2px 14px rgba(4, 10, 18, 0.85);
   opacity: 0;
-  animation: ai-chip-in 0.9s var(--ease-out) forwards;
+  animation: ai-in 0.9s var(--ease-out) 0.7s forwards;
 }
 
-/* The readouts sit in the horizontal gap between the two right-hand HUD cards ("Shipment" above,
-   "Cargo status" below), so they never collide with either at any desktop width. */
-.ai__hud {
-  position: absolute;
-  top: 38%;
-  /* 7.5% lines the readouts up with the right edge of the HUD cards */
-  right: 7.5%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
+/* percentages of the same 1600 x 900 map the route is drawn on */
+.ai__place--from {
+  left: 51.5%;
+  top: 24.5%;
+  transform: translate(-50%, 0);
 }
 
-.ai__chip--eta {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-  animation-delay: 1.2s;
+.ai__place--to {
+  left: 73.7%;
+  top: 12.5%;
+  transform: translate(-50%, 0);
 }
 
-.ai__chip--scan {
-  animation-delay: 0.9s;
-}
-
-.ai__chip-label {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(180, 226, 255, 0.85);
-}
-
-.ai__chip strong {
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-/* digital distance + progress inside the route readout */
-.ai__readout {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.15rem;
-}
-
-.ai__distance {
-  font-size: 0.72rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #bfe6ff;
-}
-
-.ai__bar {
-  position: relative;
-  width: 72px;
-  height: 3px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: rgba(160, 220, 255, 0.28);
-}
-
-.ai__bar-fill {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #38bdf8, #a5e4ff);
-  transform-origin: left;
-  transform: scaleX(0.42);
-  animation: ai-bar 7s var(--ease-in-out) infinite;
-}
-
-@keyframes ai-bar {
-  0% {
-    transform: scaleX(0.06);
-  }
-  55%,
-  100% {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes ai-chip-in {
+@keyframes ai-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- status panel ---------- */
+.ai__panel {
+  position: absolute;
+  top: 29%;
+  right: 4.5%;
+  width: min(19rem, 32vw);
+  padding: 1rem 1.15rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(168, 208, 240, 0.3);
+  border-left: 3px solid #f0a02a;
+  background: linear-gradient(140deg, rgba(9, 18, 30, 0.72) 0%, rgba(11, 22, 36, 0.54) 100%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 26px 52px -30px rgba(3, 8, 14, 0.9);
+  opacity: 0;
+  animation: ai-panel-in 0.9s var(--ease-out) 1s forwards;
+}
+
+@keyframes ai-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -346,38 +312,68 @@ const PARTICLES = [0, 1, 2, 3];
   }
 }
 
-.ai__scan-dot {
-  position: relative;
+.ai__panel-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #f2f8fd;
+}
+
+.ai__panel-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.ai__panel-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ai__panel-list dt {
+  font-size: 0.8rem;
+  color: rgba(214, 231, 246, 0.72);
+}
+
+.ai__panel-list dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f4f9fe;
+}
+
+.ai__dotlight {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #6ee7b0;
+  background: #52d996;
 }
 
-.ai__scan-dot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+.ai__panel-pin {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
-  background: #6ee7b0;
-  animation: ai-dot 2s ease-out infinite;
+  background: #f0a02a;
 }
 
-@keyframes ai-dot {
-  from {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  to {
-    transform: scale(3);
-    opacity: 0;
-  }
+.ai__panel-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(196, 218, 238, 0.5);
 }
 
-/* Tablets and phones: the panel is short and wide-cropped, so the route would stretch across the photo as a
-   bare diagonal — the whole layer is dropped there and the photograph is left clean. */
-@media (max-width: 1099px) {
+/* Phones and small tablets: the sky band is short, so the route and the panel are dropped and the scene is
+   left clean — the copy and the truck carry the hero there. */
+@media (max-width: 899px) {
   .ai {
     display: none;
   }
@@ -390,15 +386,17 @@ const PARTICLES = [0, 1, 2, 3];
   }
   .ai__dot,
   .ai__pulse,
-  .ai__dest-ring,
-  .ai__bar-fill,
-  .ai__scan-dot::after {
+  .ai__dest-ring {
     animation: none;
   }
   .ai__dot {
     opacity: 1;
   }
-  .ai__chip {
+  .ai__vehicle animateMotion {
+    display: none;
+  }
+  .ai__place,
+  .ai__panel {
     opacity: 1;
     animation: none;
   }

@@ -14,6 +14,12 @@ Replace with the company's own fleet photography when available.
 - fleet-heavy.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/D_nWwfbSNH8)
 - fleet-commercial.jpg — Photo by @nxvision on Unsplash (https://unsplash.com/photos/GOD2mDNujuU)
 - fleet-logistics.jpg — Photo by @portcalls on Unsplash (https://unsplash.com/photos/JZ0IIWzB52c)
+- hero-scene-wide.png — the hero background in use: the same artwork cropped to the scene alone (crop
+  x 620-1672, y 300-941 of the original), so the truck, highway, sky and skyline are kept and the artwork's
+  own headline, logo, buttons and logistics panel fall outside the frame. The route, the status panel and all
+  of the copy on top are the site's own HTML/SVG.
+- hero-scene.png — the company's own hero artwork as supplied by Wadi Nushakal, whole and unchanged. Kept as
+  the source for the crop above.
 - hero-logistics.jpg (heavy cargo truck under a flyover with a freight aircraft overhead and stacked containers
   behind — the hero background, used exactly as supplied, with no crop or colour edit; all framing and tone is
   done in CSS) — Photo by Tsuyoshi Kozu on Unsplash (https://unsplash.com/photos/NZ53--9-iXo)
