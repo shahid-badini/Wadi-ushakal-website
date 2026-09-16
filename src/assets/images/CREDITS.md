@@ -9,6 +9,7 @@ Replace with the company's own fleet photography when available.
 - service-heavy.jpg — Photo by @ajitsandhu on Unsplash (https://unsplash.com/photos/l0WRR2U7lWg)
 - service-general.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/Hk0oOoaCf7Y)
 - service-commercial.jpg — Photo by @rcastro40 on Unsplash (https://unsplash.com/photos/RwO3Atn-RbQ)
+- service-logistics.jpg — Photo by @harisillahi on Unsplash (https://unsplash.com/photos/fT4SwA83jH4)
 - service-local.jpg (UAE highway) — Photo by @msa_ae on Unsplash (https://unsplash.com/photos/MopMPlA1mf4)
 - fleet-cargo.jpg — Photo by @aban_pics on Unsplash (https://unsplash.com/photos/s3xgOyWfRsA)
 - fleet-heavy.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/D_nWwfbSNH8)
