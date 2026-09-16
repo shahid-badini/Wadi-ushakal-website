@@ -79,6 +79,13 @@ export const services = [
     image: 'service-local',
     alt: 'Highway lined with UAE flags leading towards the mountains',
   },
+  {
+    id: 'logistics',
+    title: 'Logistics Support',
+    text: 'Coordination that keeps your shipment moving smoothly between each stage of its journey.',
+    image: 'service-logistics',
+    alt: 'Container truck being loaded at a port terminal at sunset',
+  },
 ];
 
 export const fleet = [
