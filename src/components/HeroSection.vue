@@ -1,46 +1,51 @@
 <script setup>
+import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppIcon from './ui/AppIcon.vue';
 import HeroAiLayer from './HeroAiLayer.vue';
 import { company } from '../data/site';
-import { photo } from '../data/images';
+import { initHeroScene } from '../lib/hero-loader';
 
 /*
- * The hero follows the reference artwork the owner supplied: cinematic UAE highway at sunset, the cargo
- * truck large and to the right, the copy on the left, a glowing logistics route through the sky and a
- * smart-logistics panel top right.
+ * The hero is a live 3D scene (Three.js): a Wadi Nushakal truck driving forward down a desert highway in
+ * clear daylight — wheels turning, cab riding the suspension, the world streaming past and a slow camera
+ * parallax. `src/lib/hero/` builds it; `hero-loader.js` loads it after first paint and skips it when there
+ * is no GPU, when Save-Data is on, or when WebGL is software-rendered. In those cases the CSS horizon below
+ * is what shows, so the hero is never blank.
  *
- * It is built as layers, not as the flat reference: `hero-scene-wide.png` is that artwork cropped to the
- * scene alone (its baked-in headline, logo, buttons and panel are outside the crop — the original file is
- * kept as hero-scene.png), and everything readable on top is the site's own markup: real text, real links,
- * and the route / panel drawn in SVG and HTML by HeroAiLayer.vue.
- *
- * The scene is dark, so the hero runs on local light-on-dark tokens on the site's own brand blue. The
- * rest of the site stays on the light global palette.
+ * The copy, the logistics route and the status panel stay in HTML/SVG on top, where they are readable and
+ * can be positioned against the text.
  */
-const scene = photo('hero-scene-wide');
+// "Get Started": the visitor can type their email here and land on the contact form with it filled in.
+// There is no account system and nothing is submitted from the hero — see the note in ContactForm.vue.
+const router = useRouter();
+const email = ref('');
+const emailError = ref('');
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function start() {
+  const value = email.value.trim();
+  if (value && !EMAIL_RE.test(value)) {
+    emailError.value = 'Please enter a valid email address.';
+    return;
+  }
+  emailError.value = '';
+  router.push(value ? { path: '/contact', query: { email: value } } : { path: '/contact' });
+}
+
+let stopScene;
+onMounted(() => {
+  stopScene = initHeroScene();
+});
+onBeforeUnmount(() => stopScene?.());
 </script>
 
 <template>
   <section id="home" class="hero" aria-labelledby="hero-title">
-    <div class="hero__art" aria-hidden="true">
-      <picture>
-        <source
-          v-for="(srcset, format) in scene.sources"
-          :key="`w-${format}`"
-          :type="`image/${format}`"
-          :srcset="srcset"
-          sizes="100vw"
-        />
-        <img
-          :src="scene.img.src"
-          :width="scene.img.w"
-          :height="scene.img.h"
-          alt=""
-          fetchpriority="high"
-          decoding="async"
-        />
-      </picture>
-    </div>
+    <!-- CSS horizon: behind the canvas while it loads, and the fallback when the scene is skipped -->
+    <div class="hero__sky" aria-hidden="true"></div>
+    <!-- the 3D scene mounts its canvas here -->
+    <div class="hero__stage" data-hero-stage aria-hidden="true"></div>
 
     <!-- glowing route, GPS pins, data points and the smart-logistics panel -->
     <HeroAiLayer />
@@ -58,18 +63,42 @@ const scene = photo('hero-scene-wide');
         <p class="hero__tagline" data-hero-in style="--d: 2">{{ company.brand.tagline }}</p>
         <p class="hero__support" data-hero-in style="--d: 3">{{ company.brand.supporting }}</p>
 
-        <div class="hero__actions" data-hero-in style="--d: 4">
-          <RouterLink class="btn hero__btn hero__btn--primary" to="/contact">
-            Get a Quote
-            <AppIcon name="arrow" class="arrow" />
-          </RouterLink>
+        <form class="hero__start" data-hero-in style="--d: 4" novalidate @submit.prevent="start">
+          <div class="hero__field">
+            <label class="sr-only" for="hero-email">Your email address</label>
+            <span class="hero__field-icon" aria-hidden="true"><AppIcon name="mail" :size="18" /></span>
+            <input
+              id="hero-email"
+              v-model="email"
+              class="hero__input"
+              type="email"
+              name="email"
+              autocomplete="email"
+              inputmode="email"
+              placeholder="you@company.com"
+              :aria-invalid="emailError ? 'true' : null"
+              :aria-describedby="emailError ? 'hero-email-err' : 'hero-email-hint'"
+              @input="emailError = ''"
+            />
+            <button class="btn hero__btn hero__btn--primary" type="submit">
+              Get Started
+              <AppIcon name="arrow" class="arrow" />
+            </button>
+          </div>
+          <p v-if="emailError" id="hero-email-err" class="hero__field-error" aria-live="polite">{{ emailError }}</p>
+          <p v-else id="hero-email-hint" class="hero__field-hint">
+            We'll take you to the quote form with your email filled in.
+          </p>
+        </form>
+
+        <div class="hero__actions" data-hero-in style="--d: 5">
           <a class="btn hero__btn hero__btn--ghost" href="#services">
             Explore Our Services
             <AppIcon name="arrow" class="arrow" />
           </a>
         </div>
 
-        <ul class="hero__trust" role="list" data-hero-in style="--d: 5">
+        <ul class="hero__trust" role="list" data-hero-in style="--d: 6">
           <li>
             <span class="hero__trust-icon"><AppIcon name="truck" :size="18" /></span>
             <strong>Reliable<br />Transport</strong>
@@ -90,13 +119,13 @@ const scene = photo('hero-scene-wide');
 
 <style scoped>
 .hero {
-  /* hero-only palette: light type on the dark scene, accented with the site brand blue */
-  --h-ink: #f5f9fd;
-  --h-ink-2: rgba(226, 238, 250, 0.84);
-  --h-accent: #4a83b8;
-  --h-accent-soft: #8ec5ee;
-  --h-glass: rgba(10, 20, 33, 0.5);
-  --h-edge: rgba(168, 208, 240, 0.28);
+  /* hero palette: the site's own light tokens, over the daylight 3D scene */
+  --h-ink: var(--text);
+  --h-ink-2: var(--text-2);
+  --h-accent: var(--brand-strong);
+  --h-accent-soft: var(--brand-deep);
+  --h-glass: rgba(255, 255, 255, 0.82);
+  --h-edge: rgba(74, 131, 184, 0.28);
   position: relative;
   display: flex;
   align-items: center;
@@ -105,50 +134,43 @@ const scene = photo('hero-scene-wide');
   overflow: hidden;
   isolation: isolate;
   color: var(--h-ink);
-  background: #0b0d12;
+  background: var(--bg-3);
 }
 
 /* ==========================================================================
    Scene
    ========================================================================== */
-.hero__art {
+/* Daylight horizon in CSS: shown while the canvas loads, and left in place when the scene is skipped
+   (no WebGL, Save-Data, or software rendering). Static — no animation, so it costs nothing. */
+.hero__sky {
   position: absolute;
   inset: 0;
   z-index: -3;
-  overflow: hidden;
+  background:
+    radial-gradient(80% 50% at 66% 72%, rgba(255, 246, 228, 0.65) 0%, rgba(255, 246, 228, 0) 62%),
+    linear-gradient(180deg, #7fb0dd 0%, #bcd8ee 38%, #eef3f7 63%, #e3d7bf 64%, #cdbb98 100%);
 }
 
-.hero__art :deep(img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* the truck sits right of centre in the crop; this keeps it there and the road running out of frame */
-  object-position: 56% 66%;
-}
-
-/* Depth: the left third is deepened so the copy reads, and the bottom is closed off into the light page. */
-.hero__art::before {
-  content: '';
+.hero__stage {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      100deg,
-      rgba(6, 8, 13, 0.92) 0%,
-      rgba(8, 10, 16, 0.82) 26%,
-      rgba(10, 12, 18, 0.45) 50%,
-      rgba(12, 14, 20, 0.12) 70%,
-      rgba(12, 14, 20, 0) 100%
-    ),
-    radial-gradient(120% 95% at 62% 55%, transparent 42%, rgba(4, 6, 10, 0.55) 100%);
+  z-index: -2;
 }
 
-.hero__art::after {
+.hero__stage :deep(canvas) {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.hero::after {
   content: '';
   position: absolute;
   inset: auto 0 0 0;
-  height: 16%;
-  background: linear-gradient(180deg, rgba(245, 245, 245, 0) 0%, rgba(245, 245, 245, 0.42) 62%, var(--bg) 100%);
+  height: 14%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(245, 245, 245, 0) 0%, rgba(245, 245, 245, 0.4) 62%, var(--bg) 100%);
 }
 
 /* ==========================================================================
@@ -164,6 +186,11 @@ const scene = photo('hero-scene-wide');
 
 .hero__content {
   max-width: 34rem;
+  /* No wash and no glow: a text-shadow halo over the scene made every glyph look smudged. The copy sits on
+     the light desert and sky, so the dark type reads on its own and stays razor-sharp. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .hero__eyebrow {
@@ -173,9 +200,9 @@ const scene = photo('hero-scene-wide');
   margin: 0;
   font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--h-ink-2);
+  color: var(--h-accent-soft);
 }
 
 .hero__eyebrow-rule {
@@ -185,7 +212,7 @@ const scene = photo('hero-scene-wide');
   background: var(--h-accent);
 }
 
-/* Smaller than the global --fs-hero: the reference keeps the headline strong but not oversized. */
+/* Smaller than the global --fs-hero: strong but not oversized. */
 .hero__title {
   margin-top: 1rem;
   font-size: clamp(2rem, 1.35rem + 2.1vw, 3.35rem);
@@ -211,40 +238,101 @@ const scene = photo('hero-scene-wide');
 
 .hero__support {
   margin-top: 0.5rem;
-  font-size: clamp(0.9rem, 0.88rem + 0.1vw, 0.98rem);
-  color: var(--h-ink-2);
+  font-size: clamp(0.94rem, 0.9rem + 0.15vw, 1.02rem);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.hero__start {
+  margin-top: 1.9rem;
+  max-width: 30rem;
+}
+
+/* One rounded row: mail icon, input, and the Get Started button sitting inside it */
+.hero__field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--line-2);
+  box-shadow: var(--shadow);
+}
+
+.hero__field-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--brand-strong);
+}
+
+.hero__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.55rem 0.1rem;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.hero__input::placeholder {
+  color: var(--muted);
+}
+
+.hero__input:focus {
+  outline: none;
+}
+
+.hero__field:focus-within {
+  border-color: var(--brand);
+  box-shadow:
+    var(--shadow),
+    0 0 0 3px rgba(74, 131, 184, 0.22);
+}
+
+.hero__field-hint,
+.hero__field-error {
+  margin: 0.55rem 0 0 1rem;
+  font-size: 0.82rem;
+  color: var(--text-2);
+}
+
+.hero__field-error {
+  color: var(--error);
+  font-weight: 600;
 }
 
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1.9rem;
+  margin-top: 1rem;
 }
 
 /* The shared .btn keeps the shape and spacing; the colours come from the hero's own palette. */
 .hero__btn--primary {
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--h-accent) 0%, var(--h-accent-soft) 100%);
+  color: var(--on-brand);
+  background: linear-gradient(135deg, var(--brand-strong) 0%, #3a8fcb 100%);
   border: 1px solid transparent;
-  box-shadow: 0 18px 38px -20px rgba(4, 12, 22, 0.9);
+  box-shadow: var(--shadow);
 }
 
 .hero__btn--primary:hover {
-  background: linear-gradient(135deg, #5a93c8 0%, #7ab6e8 100%);
+  background: linear-gradient(135deg, var(--brand-hover) 0%, #3182bd 100%);
 }
 
 .hero__btn--ghost {
-  color: var(--h-ink);
-  background: var(--h-glass);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  backdrop-filter: blur(10px) saturate(140%);
-  border: 1px solid var(--h-edge);
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--line);
 }
 
 .hero__btn--ghost:hover {
-  background: rgba(16, 32, 52, 0.66);
-  border-color: rgba(168, 208, 240, 0.45);
+  background: #ffffff;
+  border-color: var(--line-2);
 }
 
 /* Trust points */
@@ -275,9 +363,9 @@ const scene = photo('hero-scene-wide');
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  color: var(--h-accent-soft);
-  background: var(--h-glass);
-  border: 1px solid var(--h-edge);
+  color: var(--brand-strong);
+  background: var(--brand-tint);
+  border: 1px solid rgba(74, 131, 184, 0.25);
 }
 
 .hero__trust strong {
@@ -311,32 +399,14 @@ const scene = photo('hero-scene-wide');
   }
 }
 
-/* Tablet & phone: a taller frame, so the crop pulls in and the wash runs downwards. The copy comes first
-   and the truck sits below it, which is the order asked for on mobile. */
+/* Tablet & phone: the copy comes first and the truck sits below it (scene.js frames the camera for this) */
 @media (max-width: 1099px) {
   .hero {
     align-items: flex-start;
   }
-  .hero__art :deep(img) {
-    object-position: 56% 76%;
-  }
-  .hero__art::before {
-    background:
-      linear-gradient(
-        176deg,
-        rgba(6, 8, 13, 0.94) 0%,
-        rgba(8, 10, 16, 0.86) 32%,
-        rgba(10, 12, 18, 0.5) 58%,
-        rgba(12, 14, 20, 0.18) 100%
-      ),
-      radial-gradient(150% 85% at 55% 70%, transparent 38%, rgba(4, 6, 10, 0.5) 100%);
-  }
   .hero__inner {
     padding-top: calc(var(--header-h) + clamp(1.75rem, 5vh, 3rem));
     padding-bottom: 38vh;
-  }
-  .hero__content {
-    max-width: 34rem;
   }
 }
 
@@ -357,6 +427,28 @@ const scene = photo('hero-scene-wide');
   }
   .hero__trust strong {
     font-size: 0.74rem;
+  }
+}
+
+/* Small phones: the email row stacks, so nothing is squeezed past the edge */
+@media (max-width: 519px) {
+  .hero__field {
+    flex-wrap: wrap;
+    padding: 0.75rem 0.9rem;
+    border-radius: var(--radius);
+  }
+  .hero__input {
+    flex: 1 1 100%;
+    padding: 0.35rem 0;
+  }
+  .hero__field .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  .hero__field-hint,
+  .hero__field-error {
+    margin-left: 0.25rem;
   }
 }
 

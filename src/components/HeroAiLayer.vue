@@ -24,13 +24,13 @@ const PARTICLES = [0, 1, 2];
     <svg class="ai__svg" viewBox="0 0 1600 900" preserveAspectRatio="none">
       <defs>
         <linearGradient id="ai-route" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stop-color="#f0a02a" stop-opacity="0.25" />
-          <stop offset="0.45" stop-color="#ffb84d" stop-opacity="0.95" />
-          <stop offset="1" stop-color="#ffd089" stop-opacity="0.9" />
+          <stop offset="0" stop-color="#b56a10" stop-opacity="0.3" />
+          <stop offset="0.45" stop-color="#e08a1a" stop-opacity="0.95" />
+          <stop offset="1" stop-color="#f0a02a" stop-opacity="0.95" />
         </linearGradient>
         <radialGradient id="ai-node">
-          <stop offset="0" stop-color="#fff3dd" />
-          <stop offset="1" stop-color="#f0a02a" />
+          <stop offset="0" stop-color="#ffe7b8" />
+          <stop offset="1" stop-color="#c8781a" />
         </radialGradient>
       </defs>
 
@@ -123,7 +123,7 @@ const PARTICLES = [0, 1, 2];
 /* ---------- digital map ---------- */
 .ai__mesh path {
   fill: none;
-  stroke: rgba(240, 160, 42, 0.32);
+  stroke: rgba(150, 90, 20, 0.34);
   stroke-width: 1;
   stroke-dasharray: 2 10;
   vector-effect: non-scaling-stroke;
@@ -132,7 +132,7 @@ const PARTICLES = [0, 1, 2];
 /* ---------- route ---------- */
 .ai__track {
   fill: none;
-  stroke: rgba(255, 224, 176, 0.36);
+  stroke: rgba(90, 70, 40, 0.3);
   stroke-width: 2;
   stroke-dasharray: 5 12;
   stroke-linecap: round;
@@ -162,7 +162,7 @@ const PARTICLES = [0, 1, 2];
 
 /* ---------- data points ---------- */
 .ai__dot {
-  fill: #ffe6bd;
+  fill: #8a5410;
   opacity: 0;
   animation: ai-spark 7s linear infinite;
   animation-delay: calc(var(--i) * 2.2s);
@@ -181,15 +181,15 @@ const PARTICLES = [0, 1, 2];
 
 /* ---------- vehicle indicator ---------- */
 .ai__vehicle rect {
-  fill: rgba(8, 18, 30, 0.85);
-  stroke: #ffb84d;
+  fill: rgba(255, 252, 245, 0.92);
+  stroke: #c8781a;
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
 
 /* ---------- GPS pins ---------- */
 .ai__node {
-  stroke: rgba(235, 246, 255, 0.9);
+  stroke: rgba(255, 252, 245, 0.95);
   stroke-width: 1.5;
 }
 
@@ -215,18 +215,18 @@ const PARTICLES = [0, 1, 2];
 
 /* ---------- destination ---------- */
 .ai__pin {
-  fill: #f0a02a;
-  stroke: rgba(235, 246, 255, 0.9);
+  fill: #c8781a;
+  stroke: rgba(255, 252, 245, 0.95);
   stroke-width: 1.5;
 }
 
 .ai__pin-dot {
-  fill: #ffe6bd;
+  fill: #8a5410;
 }
 
 .ai__dest-ring {
   fill: none;
-  stroke: rgba(255, 184, 77, 0.7);
+  stroke: rgba(200, 120, 26, 0.6);
   stroke-width: 1.5;
   transform-origin: center;
   transform-box: fill-box;
@@ -254,8 +254,8 @@ const PARTICLES = [0, 1, 2];
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #f2f8fd;
-  text-shadow: 0 2px 14px rgba(4, 10, 18, 0.85);
+  color: var(--text);
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.9);
   opacity: 0;
   animation: ai-in 0.9s var(--ease-out) 0.7s forwards;
 }
@@ -291,12 +291,12 @@ const PARTICLES = [0, 1, 2];
   width: min(19rem, 32vw);
   padding: 1rem 1.15rem 0.85rem;
   border-radius: 14px;
-  border: 1px solid rgba(168, 208, 240, 0.3);
-  border-left: 3px solid #f0a02a;
-  background: linear-gradient(140deg, rgba(9, 18, 30, 0.72) 0%, rgba(11, 22, 36, 0.54) 100%);
+  border: 1px solid var(--line);
+  border-left: 3px solid #c8781a;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.76) 100%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   backdrop-filter: blur(14px) saturate(140%);
-  box-shadow: 0 26px 52px -30px rgba(3, 8, 14, 0.9);
+  box-shadow: var(--shadow-lg);
   opacity: 0;
   animation: ai-panel-in 0.9s var(--ease-out) 1s forwards;
 }
@@ -318,7 +318,7 @@ const PARTICLES = [0, 1, 2];
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f2f8fd;
+  color: var(--text);
 }
 
 .ai__panel-list {
@@ -336,7 +336,7 @@ const PARTICLES = [0, 1, 2];
 
 .ai__panel-list dt {
   font-size: 0.8rem;
-  color: rgba(214, 231, 246, 0.72);
+  color: var(--muted);
 }
 
 .ai__panel-list dd {
@@ -346,14 +346,14 @@ const PARTICLES = [0, 1, 2];
   margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #f4f9fe;
+  color: var(--text);
 }
 
 .ai__dotlight {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #52d996;
+  background: var(--ok);
 }
 
 .ai__panel-pin {
@@ -368,7 +368,7 @@ const PARTICLES = [0, 1, 2];
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(196, 218, 238, 0.5);
+  color: var(--muted);
 }
 
 /* Phones and small tablets: the sky band is short, so the route and the panel are dropped and the scene is

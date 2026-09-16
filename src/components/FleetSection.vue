@@ -50,7 +50,6 @@ onBeforeUnmount(() => io?.disconnect());
     <div class="container">
       <div class="section-head section-head--split">
         <div>
-          <p class="eyebrow" data-reveal>Our Fleet</p>
           <h2 id="fleet-title" data-reveal style="--reveal-delay: 80">
             Built to Move <span class="text-gradient">What Matters.</span>
           </h2>

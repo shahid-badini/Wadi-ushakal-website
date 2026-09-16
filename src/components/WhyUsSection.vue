@@ -15,7 +15,6 @@ import { whyUs } from '../data/site';
 
     <div class="container">
       <div class="section-head why__head">
-        <p class="eyebrow" data-reveal>Why Choose Us</p>
         <h2 id="why-title" data-reveal style="--reveal-delay: 80">
           Trust, earned <span class="text-gradient">on every mile.</span>
         </h2>

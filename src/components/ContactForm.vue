@@ -38,11 +38,14 @@ function recheck(field) {
   if (attempted.value) validate(field);
 }
 
-// Arriving from a service card (/contact?service=heavy) pre-selects that service
+// Arriving from a service card (/contact?service=heavy) pre-selects that service; arriving from the hero's
+// "Get Started" box (/contact?email=...) fills the email in.
 const route = useRoute();
 onMounted(() => {
   const s = route.query.service;
   if (typeof s === 'string' && serviceOptions.some((o) => o.value === s)) form.service = s;
+  const e = route.query.email;
+  if (typeof e === 'string' && EMAIL_RE.test(e.trim())) form.email = e.trim();
 });
 
 function onSubmit() {

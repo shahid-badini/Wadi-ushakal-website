@@ -9,7 +9,7 @@ backend, database or server code. The build output is plain static files that an
 - **Vue 3** single-file components (`.vue`: template + script + scoped CSS)
 - **Vue Router**: two pages, the home page (`/`) and the contact page (`/contact`)
 - **Plain CSS** with design tokens in `src/styles/global.css`
-- **Three.js** for the 3D truck in the hero, loaded lazily after the page appears
+- **Three.js** for the live 3D hero scene, loaded lazily after first paint (its own ~560 KB chunk)
 - **vite-ssg** pre-renders each page to static HTML at build time (`dist/index.html`, `dist/contact/index.html`),
   which helps SEO and first-load speed. It then hydrates in the browser.
 - **vite-imagetools** converts photos to AVIF/WebP at several sizes at build time
@@ -53,7 +53,7 @@ src/
   router.js               ← routes (/ and /contact) and scroll behaviour for "/#section" links
   App.vue                 ← layout: header, <RouterView>, footer
   pages/
-    HomePage.vue          ← home page: all sections (no contact form — "Get in Touch"/"Get a Quote" link to /contact)
+    HomePage.vue          ← home page: all sections (no contact form — "Get Started" links to /contact)
     ContactPage.vue       ← contact page: hero, contact cards, form
   components/             ← one component per section
     SiteHeader.vue  HeroSection.vue  AboutSection.vue  ServicesSection.vue  FleetSection.vue
@@ -74,11 +74,13 @@ public/                   ← favicon, touch icon, og-image.jpg, robots.txt, fon
 - Every section is full width. Its content sits in `.container`, a wide content area (max 1640px) with the same
   responsive side padding everywhere (`--gutter`: about 18–22px on phones, 40px on tablets, 64–96px on desktops).
   Sections then choose their own layout: left-aligned copy, two columns, grids. Nothing is centred by default.
-- Header: logo on the left, navigation in the centre, "Get a Quote" on the right. Below 1100px the navigation moves
+- Header: logo on the left, navigation in the centre, "Get Started" on the right. Below 1100px the navigation moves
   into the hamburger menu.
-- Hero: a full-bleed cinematic scene with the copy on the left and the truck, the logistics route and the
-  status panel on the right; the left third of the scene is deepened so the copy reads over it. On tablets and
-  phones the copy comes first with the truck below it, and the logistics layer is dropped. See *Hero*.
+- No section eyebrows: the small uppercase labels above each heading ("About Wadi Nushakal", "Our Services"…) were
+  removed at the owner's request — the headings already name each section.
+- Hero: a live 3D desert-highway scene filling the section, with the copy on the left and the truck, the
+  logistics route and the status panel to the right. On tablets and phones the copy comes first with the truck
+  framed below it, and the logistics layer is dropped. See *Hero*.
 - Type scale tokens: `--fs-hero`, `--fs-h2`, `--fs-h3`, `--fs-lead` at the top of `global.css`.
 
 ## Brand colours & theme
@@ -104,8 +106,16 @@ appear everywhere at once.
 
 ## Contact page & form (frontend only)
 
-The header's "Contact" link, the "Get a Quote" / "Get in Touch" buttons and the service "Enquire" links open
-`/contact`. The service links pre-select that service in the form (`/contact?service=heavy`).
+The header's "Contact" link, the "Get Started" buttons and the service "Enquire" links open `/contact`. Two of
+them carry something through in the query string, which `ContactForm.vue` reads on mount:
+
+- the service "Enquire" links pre-select that service (`/contact?service=heavy`);
+- the hero's "Get Started" box takes the email typed into it and pre-fills the email field
+  (`/contact?email=…`, only when it looks like an address).
+
+**There is no login or account system**, and the hero's email box is not a signup: nothing is sent or stored
+anywhere by it. It is a shortcut into the quote form. Adding real accounts would need a backend (or a service
+like Firebase/Supabase), which this project deliberately does not have.
 
 The form (full name, email, phone, company, service / transport requirement, message) validates in the browser.
 Nothing is sent to or stored on a server. On submit, it opens the visitor's email app with the request pre-filled and
@@ -114,47 +124,45 @@ third-party form service (Formspree, Basin…) can be wired into `onSubmit` in `
 
 ## Hero
 
-The hero recreates the reference artwork the owner supplied — cinematic UAE highway at sunset, the cargo
-truck large and to the right, the copy on the left, a glowing logistics route and a smart-logistics panel —
-but built as layers, not as that flat image.
+The hero is a **live 3D scene** (Three.js): a Wadi Nushakal truck driving forward down a desert highway in
+clear daylight. The wheels turn, the cab rides its suspension, the world streams past the truck (which stays
+put, so the scene is endless and cheap), and the camera drifts slowly with the pointer. `src/lib/hero/` builds
+it — `scene.js` (setup, lighting, camera, render loop), `world.js` (sky, dunes, road, roadside props),
+`truck.js`, `textures.js` — and `src/lib/hero-loader.js` mounts it.
 
-**Background.** `hero-scene-wide.png` is the owner's artwork cropped to the scene alone (crop x 640-1672,
-y 330-941 of `hero-scene.png`, which is kept unchanged as the source), so the truck, highway, sky and
-skyline are in frame and the artwork's own headline, logo, buttons and panel are outside it. It is full-bleed
-(`.hero__art`, `inset: 0`, `object-position: 56% 66%`) with two gradients over it: a directional wash that
-deepens the left third behind the copy, and a closure along the bottom into the light page below. No white
-overlay anywhere.
+**How it loads.** After first paint, once the browser is idle, so it never blocks the initial render. It is
+skipped entirely when WebGL2 is missing, when Save-Data is on, or when WebGL is software-rendered; in those
+cases the CSS horizon in `.hero__sky` is what shows, so the hero is never blank. `?force3d` bypasses the
+software check (headless Chrome trips it, so the test scripts use it).
 
-**Copy.** Everything readable is the site's own markup — eyebrow, a real `<h1>`, tagline, supporting line,
-two real links ("Get a Quote" to `/contact`, "Explore Our Services" to `#services`) and the trust row. Left
-aligned, never centred, capped so it stays out of the truck. The headline is deliberately smaller than the
-global `--fs-hero` (`clamp(2rem, 1.35rem + 2.1vw, 3.35rem)`).
+**Smoothness.** Resolution is capped at 1.25x and steps down (1x, 0.8x) if frames slow; below ~45 fps it
+drops to half rate, and on very slow devices it settles on a single still frame. It renders at half rate
+while the page is being scrolled, and pauses completely when off-screen or when the tab is hidden. Measured
+on the owner's machine: idle 0.0% and scroll 0.1% of frames over 25 ms.
 
-**Logistics layer** (`HeroAiLayer.vue`): a glowing route from Abu Dhabi to the destination with GPS pins, a
-vehicle indicator travelling it, data points, a faint digital mesh and a glass status panel (Route Status /
-Cargo / Destination). It is a design element, not live tracking — the drawing is `aria-hidden` and the panel
-is labelled "Illustrative". Coordinates are a 1600 x 900 map of the hero; the route sits in the open sky
-(x 880-1180, y 146-258), clear of the copy, the header capsule and the panel. Hidden below 900px, where the
-sky band is too short for it.
+**Copy and overlays.** Everything readable is HTML/SVG on top: eyebrow, a real `<h1>`, tagline, supporting
+line, two real links and the trust row, left aligned and capped at 34rem. `HeroAiLayer.vue` adds the glowing
+Abu Dhabi to Destination route with GPS pins, a vehicle indicator, data points and a glass status panel
+(labelled "Illustrative" — there is no live tracking). The copy uses the site's light tokens; the route and
+panel accent use gold.
 
-**Colour.** The hero runs on local `--h-*` tokens (light type on the dark scene) so the rest of the site
-stays on the light global palette. The copy, buttons and trust icons use the brand blue; the route, pins,
-destination marker and panel accent use the artwork's gold.
+Two things were tried here and **removed for cause** — don't reintroduce them:
 
-**Header.** Over the hero the bar switches to dark glass (`is-over-hero` in `SiteHeader.vue`: home page,
-not scrolled) with light nav and logo text, and returns to the light glass as soon as the page scrolls or on
-any other page.
+- A white wash over the scene behind the copy, and later a `text-shadow` halo on the copy. The wash was the
+  "white shade" the owner objected to; the halo made every glyph look smudged. The scene behind the copy is
+  light desert and sky, so the dark type reads unaided — the copy just sets `font-smoothing`/
+  `optimizeLegibility` and nothing else.
+- A full-viewport camera drift on a background image (before the 3D scene): it cost scroll p95 33 ms and
+  5.3% janky frames, versus 0.0% without it.
 
-**Motion and performance.** Only the logistics layer animates — the route draws, pins pulse, data points and
-the vehicle indicator travel the path, all on transform / opacity / stroke-dashoffset. A full-viewport
-"camera drift" on the image was tried and **removed**: it cost real frames (scroll p95 33ms, 5.3% of frames
-over 25ms) and dropped back to 0.0% without it. Two things the reference implies are not possible from a
-single photograph and are deliberately absent: rotating wheels and suspension travel on the truck (those
-need a 3D model, which was tried earlier, looked cartoonish and was heavy on this machine).
+Earlier versions of this section are worth knowing about, because the same ground was covered several times:
+a photo in a right-hand panel, a full-bleed photo, a dark cinematic treatment, and the owner's reference
+artwork used flat with the copy hidden behind it. The artwork files are still in `src/assets/images/`
+(`hero-scene.png` whole, `hero-scene-wide.png` cropped to the scene) if a photo hero is ever wanted back.
 
-`scratchpad/measure-hero.mjs` (session-local) checks that the scene covers the section, the copy stays in the
-left half and clear of the header, the destination marker and place labels do not clash with the panel,
-header or copy, and that no leftovers from earlier hero versions are in the page.
+`scratchpad/measure-hero.mjs` (session-local) checks that the 3D stage covers the section, that a canvas
+actually mounted, that the copy is visible and clear of the header, that the route markers and labels do not
+clash with the panel or the copy, and that no leftovers from the earlier versions are in the page.
 
 The UAE map is an **illustrative visual**, not live tracking data, and is captioned accordingly. (The hero's
 dashboard-style overlays, which carried the same caveat, are no longer part of the page.)

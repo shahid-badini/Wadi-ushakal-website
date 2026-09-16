@@ -76,7 +76,6 @@ onBeforeUnmount(() => {
 
     <div class="container mile__inner">
       <div class="mile__head">
-        <p class="eyebrow" data-reveal>From pickup to destination</p>
         <h2 id="mile-title" data-reveal style="--reveal-delay: 80">
           Every Mile <span class="text-gradient">Matters.</span>
         </h2>

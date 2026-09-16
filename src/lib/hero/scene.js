@@ -21,7 +21,7 @@ async function phase(name, fn) {
 }
 
 /**
- * Hero 3D scene: a Wadi Nushakal truck on a desert highway in daylight.
+ * Hero 3D scene: a Wadi Nushakal truck on a desert highway in clear daylight.
  * The truck stays put while the world streams past it, so the scene is endless and cheap.
  *
  * Smoothness safeguards:
@@ -40,17 +40,16 @@ export async function mountHeroScene(stage) {
       antialias: !lite,
       powerPreference: 'high-performance',
       stencil: false,
-      alpha: true, // the truck is composited over the hero photo
+      alpha: false, // the scene paints the whole hero, sky included
     });
-    renderer.setClearAlpha(0);
     renderer.setPixelRatio(maxRatio);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     // Neutral tone mapping keeps light, brand-accurate colours (ACES would grey them out)
     renderer.toneMapping = THREE.NeutralToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 1.02;
     const scene = new THREE.Scene();
-    // Dusk haze: distant desert fades into the mauve horizon
-    scene.fog = new THREE.Fog(new THREE.Color('#4c4a5e'), 90, 520);
+    // Daylight haze: the distant desert dissolves into the pale horizon
+    scene.fog = new THREE.Fog(new THREE.Color('#cdd9e4'), 120, 560);
     const camera = new THREE.PerspectiveCamera(30, 1, 0.5, 2000);
     return { renderer, scene, camera };
   });
@@ -67,10 +66,10 @@ export async function mountHeroScene(stage) {
 
   const world = await phase('world', () => {
     const w = createWorld({ road: tex.road, sand: tex.sand, glow: tex.glow, anisotropy, lite });
-    // The hero shows a real photo of the road and the truck, so the 3D world is built but not drawn — a 3D route
-    // line or floating markers can't line up with a real photograph. The sky is still used for reflections, and
-    // the animated overlays in the hero are the HUD cards and the service ticker (plain DOM).
-    w.group.visible = false;
+    // The hero is the 3D scene itself now, so the world is drawn: sky, desert, highway and roadside props.
+    // The 3D overlay (route line, floating markers) stays off — the route and the status panel are HTML/SVG
+    // in HeroAiLayer.vue, where they stay readable and can be positioned against the copy.
+    w.group.visible = true;
     w.overlay.visible = false;
     scene.add(w.group, w.overlay);
     return w;
@@ -80,9 +79,9 @@ export async function mountHeroScene(stage) {
   const truck = await phase('truck', () => {
     livery.anisotropy = anisotropy;
     const t = createTruck({ livery, ribs: tex.ribs, rim: tex.rim, shadow: tex.shadow, glow: tex.glow });
-    // The truck in the hero is the real one in the photograph, so the 3D truck is built but not drawn —
-    // only the route line and the location markers are composited over the photo (see world.overlay).
-    t.group.visible = false;
+    // The truck is the focal point of the hero: it drives forward, its wheels turn and the cab rides the
+    // suspension (see truck.js `update`).
+    t.group.visible = true;
     scene.add(t.group);
     return t;
   });
@@ -93,16 +92,17 @@ export async function mountHeroScene(stage) {
     const envScene = new THREE.Scene();
     envScene.add(world.sky.clone());
     scene.environment = pmrem.fromScene(envScene, 0.04, 0.1, 2000).texture;
-    scene.environmentIntensity = 0.7;
+    scene.environmentIntensity = 0.85;
     pmrem.dispose();
   });
 
-  // Daylight, to match the photo behind: high sun from the camera side + bright sky fill + a cool back light
-  scene.add(new THREE.HemisphereLight(0xe4eef8, 0xd2bb94, 1.5));
-  const sun = new THREE.DirectionalLight(0xfff5e6, 2.3);
-  sun.position.set(30, 45, 25);
-  const back = new THREE.DirectionalLight(0xd6e6f7, 0.6);
-  back.position.set(-20, 12, -30);
+  // Daylight: a high sun from the camera side, bright sky fill, and a soft cool bounce from behind, so the
+  // cab and the trailer keep their edges without going dark.
+  scene.add(new THREE.HemisphereLight(0xe8f1fb, 0xd8c6a4, 1.45));
+  const sun = new THREE.DirectionalLight(0xfff6e8, 2.5);
+  sun.position.set(28, 40, 22);
+  const back = new THREE.DirectionalLight(0xd6e6f7, 0.65);
+  back.position.set(-22, 14, -28);
   scene.add(sun, back);
 
   stage.appendChild(renderer.domElement);

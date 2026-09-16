@@ -34,7 +34,6 @@ onMounted(initReveal);
 
     <div class="container contact-hero__grid">
       <div class="contact-hero__copy">
-        <p class="eyebrow" data-reveal>Contact Us</p>
         <h1 id="contact-title" data-reveal style="--reveal-delay: 80">
           Let’s Move <span class="text-gradient">Your Cargo.</span>
         </h1>
@@ -83,7 +82,6 @@ onMounted(initReveal);
   <section class="section contact-main" aria-labelledby="contact-info-title">
     <div class="container contact-main__grid">
       <div class="contact-info">
-        <p class="eyebrow" data-reveal>Contact Information</p>
         <h2 id="contact-info-title" data-reveal style="--reveal-delay: 60">Talk to our team</h2>
         <p class="muted" data-reveal style="--reveal-delay: 120">
           Reach us directly by email or phone, or send your requirement with the form.

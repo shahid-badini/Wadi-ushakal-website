@@ -40,46 +40,78 @@ class PartBuilder {
 export function createTruck(tx) {
   const root = new THREE.Group();
 
-  // Materials — MeshStandardMaterial throughout (physical/clearcoat materials cost an extra shading pass)
-  const paint = new THREE.MeshStandardMaterial({ color: 0xf3f3f1, metalness: 0.2, roughness: 0.32 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x1e2226, metalness: 0.3, roughness: 0.62 });
-  const trim = new THREE.MeshStandardMaterial({ color: 0x3a4048, metalness: 0.6, roughness: 0.4 });
-  const chrome = new THREE.MeshStandardMaterial({ color: 0xe3e7ec, metalness: 1, roughness: 0.16 });
-  const glass = new THREE.MeshStandardMaterial({ color: 0x1b2632, metalness: 0.6, roughness: 0.08, envMapIntensity: 1.3 });
-  const accent = new THREE.MeshStandardMaterial({ color: 0x4a83b8, metalness: 0.2, roughness: 0.4 });
+  // Materials. The body is the one place worth a physical material: clearcoat over paint is what makes a
+  // truck read as a real vehicle rather than a plastic toy, and there is only one such material in the scene.
+  const paint = new THREE.MeshPhysicalMaterial({
+    color: 0xf6f7f7,
+    metalness: 0.08,
+    roughness: 0.22,
+    clearcoat: 1,
+    clearcoatRoughness: 0.06,
+    envMapIntensity: 1.35,
+  });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x16191d, metalness: 0.35, roughness: 0.55 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0x33383f, metalness: 0.75, roughness: 0.32 });
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xeef2f6, metalness: 1, roughness: 0.08, envMapIntensity: 1.6 });
+  const glass = new THREE.MeshPhysicalMaterial({
+    color: 0x0e1620,
+    metalness: 0,
+    roughness: 0.04,
+    clearcoat: 1,
+    clearcoatRoughness: 0.03,
+    envMapIntensity: 2.1,
+    reflectivity: 0.9,
+  });
+  const accent = new THREE.MeshStandardMaterial({ color: 0x4a83b8, metalness: 0.25, roughness: 0.34 });
   const lens = new THREE.MeshBasicMaterial({ color: 0xf4f7fb });
   const amber = new THREE.MeshBasicMaterial({ color: 0xffb54d });
   const red = new THREE.MeshBasicMaterial({ color: 0xe0352b });
 
   // ---------------------------------------------------------------- Tractor cab (bobs independently)
+  // Built as a real cab reads: a sleeper box, a shoulder that steps in above the doors, a short tapered
+  // nose over the engine, and a screen raked back over it. Rounded boxes carry the bevels, which is what
+  // stops the whole thing reading as a stack of blocks.
   const cabParts = new PartBuilder();
-  cabParts.box(2.5, 2.75, 2.3, paint, [0, 2.52, 3.3], 0.16);
-  cabParts.box(2.4, 0.56, 1.9, paint, [0, 4.1, 3.05], 0.2, [-0.06, 0, 0]);
-  // glazing
-  cabParts.box(2.24, 1.12, 0.05, glass, [0, 3.1, 4.44], 0, [-0.07, 0, 0]);
-  cabParts.box(0.04, 0.82, 1.05, glass, [1.255, 3.12, 3.72]);
-  cabParts.box(0.04, 0.82, 1.05, glass, [-1.255, 3.12, 3.72]);
-  cabParts.box(2.34, 0.1, 0.34, dark, [0, 3.76, 4.52]); // sun visor
-  // face
-  cabParts.box(1.9, 1.0, 0.08, dark, [0, 2.05, 4.47], 0.03);
-  for (let i = 0; i < 4; i++) cabParts.box(1.76, 0.055, 0.05, chrome, [0, 1.7 + i * 0.22, 4.52]);
-  cabParts.box(2.3, 0.08, 0.03, accent, [0, 2.66, 4.46]);
-  // headlight housings + lenses
-  [-0.9, 0.9].forEach((x) => {
-    cabParts.box(0.66, 0.28, 0.06, trim, [x, 1.5, 4.46]);
-    cabParts.box(0.52, 0.15, 0.04, lens, [x, 1.5, 4.5]);
+  cabParts.box(2.48, 2.05, 1.5, paint, [0, 2.28, 2.62], 0.34); // sleeper / body
+  cabParts.box(2.46, 1.5, 1.35, paint, [0, 3.42, 2.72], 0.4); // upper shoulder, stepped in
+  cabParts.box(2.36, 0.62, 1.75, paint, [0, 4.12, 2.86], 0.3, [-0.05, 0, 0]); // roof
+  cabParts.box(2.2, 0.46, 1.05, paint, [0, 4.0, 1.86], 0.22, [0.2, 0, 0]); // roof fairing to the trailer
+  // nose: two stacked boxes, the upper one pulled back, so the front slopes instead of standing square
+  cabParts.box(2.38, 1.0, 1.15, paint, [0, 2.0, 4.02], 0.26);
+  cabParts.box(2.26, 0.62, 0.95, paint, [0, 2.78, 3.88], 0.24, [-0.22, 0, 0]);
+  // glazing: a raked screen over the nose, plus door glass
+  cabParts.box(2.2, 1.24, 0.06, glass, [0, 3.44, 3.9], 0.02, [-0.26, 0, 0]);
+  cabParts.box(0.04, 0.78, 1.15, glass, [1.245, 3.5, 2.78]);
+  cabParts.box(0.04, 0.78, 1.15, glass, [-1.245, 3.5, 2.78]);
+  cabParts.box(2.32, 0.1, 0.4, dark, [0, 4.12, 3.62], 0.03, [-0.26, 0, 0]); // sun visor over the screen
+  // face: grille set into the nose, chrome slats, brand bar
+  cabParts.box(1.86, 0.82, 0.08, dark, [0, 2.02, 4.62], 0.04);
+  for (let i = 0; i < 5; i++) cabParts.box(1.72, 0.06, 0.05, chrome, [0, 1.74 + i * 0.17, 4.66]);
+  cabParts.box(2.26, 0.1, 0.04, accent, [0, 2.56, 4.6], 0.02);
+  // headlight housings + lenses, wrapped into the nose corners
+  [-0.92, 0.92].forEach((x) => {
+    cabParts.box(0.6, 0.3, 0.08, trim, [x, 1.52, 4.58], 0.05);
+    cabParts.box(0.48, 0.17, 0.05, lens, [x, 1.52, 4.63], 0.03);
+    cabParts.box(0.2, 0.1, 0.05, amber, [x > 0 ? 1.19 : -1.19, 1.52, 4.4], 0.02); // indicators
   });
-  cabParts.box(2.54, 0.5, 0.42, trim, [0, 1.05, 4.34], 0.06); // bumper
+  cabParts.box(2.54, 0.46, 0.46, trim, [0, 1.12, 4.5], 0.16); // bumper
+  cabParts.box(2.26, 0.24, 0.32, dark, [0, 0.8, 4.44], 0.1); // air dam
+  [-1, 1].forEach((s2) => cabParts.box(0.12, 0.66, 1.7, paint, [s2 * 1.2, 1.36, 2.9], 0.08)); // side skirts
+  // front wheel arches, so the tyres sit in the body instead of beside it
+  [-1, 1].forEach((s2) => {
+    cabParts.add(new THREE.TorusGeometry(0.66, 0.1, 6, 12, Math.PI), paint, [s2 * 1.14, 1.12, 3.4], [0, Math.PI / 2, 0]);
+  });
   // side brand stripes
-  cabParts.box(0.03, 0.12, 2.0, accent, [1.262, 1.62, 3.3]);
-  cabParts.box(0.03, 0.12, 2.0, accent, [-1.262, 1.62, 3.3]);
-  // mirrors
+  cabParts.box(0.03, 0.14, 1.7, accent, [1.255, 1.68, 2.9]);
+  cabParts.box(0.03, 0.14, 1.7, accent, [-1.255, 1.68, 2.9]);
+  // mirrors on proper arms
   [-1, 1].forEach((s) => {
-    cabParts.box(0.36, 0.05, 0.05, dark, [s * 1.42, 3.34, 4.18]);
-    cabParts.box(0.14, 0.58, 0.28, paint, [s * 1.62, 3.1, 4.18], 0.04);
+    cabParts.box(0.4, 0.05, 0.05, dark, [s * 1.44, 3.62, 3.72]);
+    cabParts.box(0.12, 0.62, 0.3, paint, [s * 1.66, 3.36, 3.72], 0.05);
+    cabParts.box(0.1, 0.28, 0.16, paint, [s * 1.6, 2.86, 3.86], 0.04); // kerb mirror below it
   });
   // roof marker lights
-  for (let i = 0; i < 5; i++) cabParts.box(0.14, 0.07, 0.05, amber, [-0.56 + i * 0.28, 4.33, 4.02]);
+  for (let i = 0; i < 5; i++) cabParts.box(0.15, 0.08, 0.06, amber, [-0.58 + i * 0.29, 4.4, 3.68], 0.02);
   const cab = cabParts.build();
   root.add(cab);
 
@@ -88,11 +120,25 @@ export function createTruck(tx) {
   const chassisParts = new PartBuilder();
   chassisParts.box(1.0, 0.3, 6.6, dark, [0, 0.85, 1.1]);
   [-1, 1].forEach((s) => {
-    chassisParts.add(new THREE.CylinderGeometry(0.3, 0.3, 1.2, 16), chrome, [s * 1.0, 0.92, 1.35], [Math.PI / 2, 0, 0]);
-    chassisParts.box(0.34, 0.5, 0.78, dark, [s * 1.08, 0.95, 2.7]); // steps
+    // fuel tank: a polished cylinder slung under the door, the detail that most says "truck"
+    chassisParts.add(new THREE.CylinderGeometry(0.34, 0.34, 1.5, 20), chrome, [s * 1.02, 0.94, 1.5], [Math.PI / 2, 0, 0]);
+    chassisParts.add(new THREE.TorusGeometry(0.34, 0.035, 5, 16), trim, [s * 1.02, 0.94, 0.85], [0, 0, 0]);
+    chassisParts.add(new THREE.TorusGeometry(0.34, 0.035, 5, 16), trim, [s * 1.02, 0.94, 2.15], [0, 0, 0]);
+    chassisParts.box(0.36, 0.06, 1.4, trim, [s * 1.02, 1.3, 1.5]); // tank step plate
+    chassisParts.box(0.3, 0.06, 0.62, trim, [s * 1.1, 0.62, 2.72]); // lower step
+    chassisParts.box(0.3, 0.06, 0.62, trim, [s * 1.1, 1.02, 2.72]); // upper step
+    // air tanks behind the drive axles
+    chassisParts.add(new THREE.CylinderGeometry(0.16, 0.16, 0.8, 12), trim, [s * 0.62, 0.72, -0.9], [0, 0, Math.PI / 2]);
   });
-  chassisParts.add(new THREE.CylinderGeometry(0.08, 0.08, 1.7, 10), chrome, [1.05, 3.35, 2.02]); // exhaust stack
+  // twin chrome exhaust stacks behind the cab
+  [-1, 1].forEach((s) => {
+    chassisParts.add(new THREE.CylinderGeometry(0.13, 0.13, 2.5, 14), chrome, [s * 1.12, 2.9, 1.62]);
+    chassisParts.add(new THREE.CylinderGeometry(0.16, 0.15, 0.2, 14), chrome, [s * 1.12, 4.2, 1.62]);
+  });
+  chassisParts.box(1.9, 0.07, 0.9, trim, [0, 1.2, 0.5], 0.03); // catwalk between cab and trailer
   chassisParts.box(2.6, 0.08, 2.5, dark, [0, 1.13, -0.45]); // rear fenders
+  // mud flaps behind the drive axles
+  [-1, 1].forEach((s2) => chassisParts.box(0.62, 0.5, 0.04, dark, [s2 * 0.98, 0.5, -1.85]));
   root.add(chassisParts.build());
 
   // ---------------------------------------------------------------- Trailer
@@ -103,12 +149,13 @@ export function createTruck(tx) {
   const sideMat = new THREE.MeshStandardMaterial({
     map: tx.livery,
     bumpMap: ribsSide,
-    bumpScale: 0.2, // gentle ribs — the low dusk light exaggerates stronger bumps into stripes
-    metalness: 0.2,
-    roughness: 0.45,
+    bumpScale: 0.28,
+    metalness: 0.45,
+    roughness: 0.34,
+    envMapIntensity: 1.15,
   });
-  const plainMat = new THREE.MeshStandardMaterial({ color: 0xe9eaec, metalness: 0.2, roughness: 0.45 });
-  const container = new THREE.Mesh(new THREE.BoxGeometry(2.55, 2.9, 13.6), [
+  const plainMat = new THREE.MeshStandardMaterial({ color: 0xe4e6e9, metalness: 0.45, roughness: 0.34, envMapIntensity: 1.15 });
+  const container = new THREE.Mesh(new RoundedBoxGeometry(2.55, 2.9, 13.6, 2, 0.07), [
     sideMat,
     sideMat,
     plainMat,
@@ -121,6 +168,8 @@ export function createTruck(tx) {
 
   const trailerParts = new PartBuilder();
   trailerParts.box(1.0, 0.28, 13.2, dark, [0, 1.25, -5.6]);
+  // aero side skirts along the trailer, which also ground it visually
+  [-1, 1].forEach((s2) => trailerParts.box(0.06, 0.62, 7.2, plainMat, [s2 * 1.22, 1.05, -6.2], 0.03));
   [-1, 1].forEach((s) => {
     trailerParts.box(0.05, 0.28, 6.4, trim, [s * 1.2, 1.02, -5.3]); // side guard
     trailerParts.box(0.12, 0.9, 0.12, trim, [s * 0.85, 0.85, -2.4]); // landing gear
@@ -150,16 +199,16 @@ export function createTruck(tx) {
     [0.98, -10.5, 0.5, 0.62], [-0.98, -10.5, 0.5, 0.62],
     [0.98, -11.8, 0.5, 0.62], [-0.98, -11.8, 0.5, 0.62],
   ];
-  const wheelGeo = new THREE.CylinderGeometry(1, 1, 1, 24, 1).rotateZ(Math.PI / 2);
-  const tyre = new THREE.MeshStandardMaterial({ color: 0x151619, roughness: 0.92, metalness: 0 });
-  const rimMat = new THREE.MeshStandardMaterial({ map: tx.rim, metalness: 0.7, roughness: 0.35 });
+  const wheelGeo = new THREE.CylinderGeometry(1, 1, 1, 32, 1).rotateZ(Math.PI / 2);
+  const tyre = new THREE.MeshStandardMaterial({ color: 0x0f1113, roughness: 0.96, metalness: 0 });
+  const rimMat = new THREE.MeshStandardMaterial({ map: tx.rim, metalness: 0.85, roughness: 0.22, envMapIntensity: 1.4 });
   const wheels = new THREE.InstancedMesh(wheelGeo, [tyre, rimMat, rimMat], wheelDefs.length);
   root.add(wheels);
 
   // ---------------------------------------------------------------- Contact shadow (soft, daylight)
   const shadow = new THREE.Mesh(
     new THREE.PlaneGeometry(3.8, 19),
-    new THREE.MeshBasicMaterial({ map: tx.shadow, color: 0x1c2733, transparent: true, opacity: 0.55, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ map: tx.shadow, color: 0x24313f, transparent: true, opacity: 0.42, depthWrite: false }),
   );
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.set(0.25, 0.035, -4);

@@ -33,7 +33,6 @@ const insetImage = photo('about-tanker-mountain');
       </div>
 
       <div class="about__content">
-        <p class="eyebrow" data-reveal>About Wadi Nushakal</p>
         <h2 id="about-title" data-reveal style="--reveal-delay: 80">
           Moving cargo with <span class="text-gradient">care, precision</span> and trust.
         </h2>

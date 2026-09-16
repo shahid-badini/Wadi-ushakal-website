@@ -12,7 +12,6 @@ const cards = services.map((s, i) => ({ ...s, num: String(i + 1).padStart(2, '0'
     <div class="container">
       <div class="section-head section-head--split">
         <div>
-          <p class="eyebrow" data-reveal>Our Services</p>
           <h2 id="services-title" data-reveal style="--reveal-delay: 80">
             Transport solutions,<br /><span class="text-gradient">handled with commitment.</span>
           </h2>

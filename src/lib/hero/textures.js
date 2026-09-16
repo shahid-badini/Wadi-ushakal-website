@@ -52,10 +52,10 @@ export function roadTexture() {
   const [c, g] = makeCanvas(S, S);
   const px = S / 12;
 
-  g.fillStyle = '#4a4e54';
+  g.fillStyle = '#54585e';
   g.fillRect(0, 0, S, S);
   // shoulders slightly lighter
-  g.fillStyle = '#585c62';
+  g.fillStyle = '#63676d';
   g.fillRect(0, 0, 2.4 * px, S);
   g.fillRect(S - 2.4 * px, 0, 2.4 * px, S);
 
@@ -90,7 +90,7 @@ export function roadTexture() {
 export function sandTexture() {
   const S = 256;
   const [c, g] = makeCanvas(S, S);
-  g.fillStyle = '#e6d3ae';
+  g.fillStyle = '#e2cfa8';
   g.fillRect(0, 0, S, S);
   // ripples
   for (let y = 0; y < S; y += 6) {

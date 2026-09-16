@@ -13,10 +13,6 @@ const activeHash = ref('');
 
 // Highlighted nav item: the section in view on the home page, or the current page elsewhere
 const current = computed(() => (route.path === '/' ? (activeHash.value ? `/${activeHash.value}` : '') : route.path));
-
-// At the top of the home page the bar floats over the dark hero scene, so it switches to dark glass there.
-// Once the page is scrolled (or on any other page) it returns to the light glass used on light sections.
-const overHero = computed(() => route.path === '/' && !scrolled.value && !open.value);
 const ariaCurrent = (href) => (current.value === href ? (href.startsWith('/#') ? 'true' : 'page') : null);
 
 // Mobile menu: `open` is the logical state, `shown` removes [hidden], `entered` runs the CSS transition.
@@ -125,9 +121,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="site-header" :class="{ 'is-scrolled': scrolled || open, 'is-over-hero': overHero }">
+  <header class="site-header" :class="{ 'is-scrolled': scrolled || open }">
     <div class="container">
-      <!-- One floating box: company name · navigation · Get a Quote -->
+      <!-- One floating box: company name · navigation · Get Started -->
       <div class="site-header__bar">
         <!-- Light that streams along the glass rim (decorative) -->
         <span class="site-header__glow" aria-hidden="true"></span>
@@ -143,7 +139,7 @@ onBeforeUnmount(() => {
 
         <div class="site-header__actions">
           <RouterLink class="btn btn--primary site-header__cta" to="/contact">
-            Get a Quote
+            Get Started
             <AppIcon name="arrow" class="arrow" />
           </RouterLink>
           <button
@@ -181,7 +177,7 @@ onBeforeUnmount(() => {
       </nav>
       <div class="mobile-menu__footer" :style="{ '--i': nav.length }">
         <RouterLink class="btn btn--primary" to="/contact" @click="setOpen(false, false)">
-          Get a Quote
+          Get Started
           <AppIcon name="arrow" class="arrow" />
         </RouterLink>
         <div class="mobile-menu__contact">
@@ -333,41 +329,7 @@ onBeforeUnmount(() => {
   background: var(--brand-tint);
 }
 
-/* ==========================================================================
-   Over the dark hero: the same glass bar, inverted
-   ========================================================================== */
-.site-header.is-over-hero .site-header__bar {
-  background: linear-gradient(120deg, rgba(12, 18, 28, 0.58) 0%, rgba(14, 22, 34, 0.44) 100%);
-  border-color: rgba(168, 208, 240, 0.22);
-}
 
-.site-header.is-over-hero .site-nav a {
-  color: rgba(226, 238, 250, 0.86);
-}
-
-.site-header.is-over-hero .site-nav a:hover {
-  color: #f5f9fd;
-  background: rgba(168, 208, 240, 0.16);
-}
-
-.site-header.is-over-hero :deep(.logo__name) {
-  color: #f5f9fd;
-}
-
-.site-header.is-over-hero :deep(.logo__sub) {
-  color: rgba(205, 222, 240, 0.72);
-}
-
-.site-header.is-over-hero .menu-toggle {
-  background: rgba(168, 208, 240, 0.16);
-  color: #f5f9fd;
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .site-header.is-over-hero .site-header__bar {
-    background: rgba(12, 18, 28, 0.9);
-  }
-}
 
 .site-nav a[aria-current] {
   color: var(--on-brand);

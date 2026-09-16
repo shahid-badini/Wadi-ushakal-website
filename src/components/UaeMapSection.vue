@@ -75,7 +75,6 @@ const translate = ([x, y]) => `translate(${x.toFixed(1)} ${y.toFixed(1)})`;
   <section id="uae" class="section uae" aria-labelledby="uae-title">
     <div class="container uae__grid">
       <div class="uae__content">
-        <p class="eyebrow" data-reveal>UAE Logistics</p>
         <h2 id="uae-title" data-reveal style="--reveal-delay: 80">
           Moving Cargo <span class="text-gradient">Across the UAE.</span>
         </h2>

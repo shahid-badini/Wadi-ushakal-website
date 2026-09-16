@@ -57,7 +57,7 @@ export function createWorld(opts) {
   const overlay = new THREE.Group();
   let travelled = 0;
 
-  // ------------------------------------------------------------------ Daylight sky (also used for reflections)
+  // ------------------------------------------------------------------ Daylight sky (also lights the truck)
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(900, 32, 16),
     new THREE.ShaderMaterial({
@@ -65,13 +65,13 @@ export function createWorld(opts) {
       depthWrite: false,
       fog: false,
       uniforms: {
-        // Daylight (the sky is only used for the truck's reflections now — see scene.js)
-        uTop: { value: new THREE.Color('#a9c6e2') },
-        uMid: { value: new THREE.Color('#d3e2ef') },
-        uHorizon: { value: new THREE.Color('#e9eef3') },
-        uGround: { value: new THREE.Color('#e4dccd') },
-        uSun: { value: new THREE.Color('#fff4dc') },
-        uSunDir: { value: new THREE.Vector3(0.35, 0.4, -1).normalize() },
+        // Clear UAE daylight: bright sky, pale haze at the horizon, high sun ahead of the truck
+        uTop: { value: new THREE.Color('#7fb0dd') },
+        uMid: { value: new THREE.Color('#bcd8ee') },
+        uHorizon: { value: new THREE.Color('#eef3f7') },
+        uGround: { value: new THREE.Color('#e3d7bf') },
+        uSun: { value: new THREE.Color('#fff6e4') },
+        uSunDir: { value: new THREE.Vector3(0.35, 0.42, -1).normalize() },
       },
       vertexShader: /* glsl */ `
         varying vec3 vDir;
@@ -86,15 +86,11 @@ export function createWorld(opts) {
           vec3 d = normalize(vDir);
           float h = d.y;
           float s = max(dot(d, uSunDir), 0.0);
-          vec3 horizon = mix(vec3(0.34, 0.29, 0.39), uHorizon, pow(s, 3.0));
+          vec3 horizon = mix(vec3(0.72, 0.79, 0.86), uHorizon, pow(s, 3.0));
           vec3 col = mix(horizon, uMid, smoothstep(0.0, 0.22, h));
           col = mix(col, uTop, smoothstep(0.18, 0.7, h));
           col = mix(col, uGround, smoothstep(0.0, -0.06, h));
           col += uSun * (pow(s, 6.0) * 0.35 + pow(s, 120.0) * 1.2);
-          // a few faint stars high up
-          vec2 cell = floor(d.xz / max(h, 0.05) * 90.0);
-          float star = step(0.9975, fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453));
-          col += vec3(0.85, 0.9, 1.0) * star * smoothstep(0.3, 0.65, h) * 0.8;
           gl_FragColor = vec4(col, 1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -110,9 +106,9 @@ export function createWorld(opts) {
   groundGeo.translate(ROAD_X, 0, -GD / 2 + 120);
   const gp = groundGeo.attributes.position;
   const colors = new Float32Array(gp.count * 3);
-  // Dusk sand: darker in the hollows, warmer on the crests
-  const cLow = new THREE.Color('#5e4b3e');
-  const cHigh = new THREE.Color('#a4836a');
+  // Daylight sand: warm shadow in the hollows, bright light on the crests
+  const cLow = new THREE.Color('#b79c72');
+  const cHigh = new THREE.Color('#ead7b0');
   const c = new THREE.Color();
   for (let i = 0; i < gp.count; i++) {
     const h = duneHeight(gp.getX(i), gp.getZ(i));
