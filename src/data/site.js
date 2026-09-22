@@ -7,9 +7,9 @@ export const company = {
   name: 'Wadi Nushakal',
   industry: 'Transport & Logistics',
   country: 'United Arab Emirates',
-  // Email is reproduced exactly as supplied and confirmed by the company.
-  email: 'innfo@wadinushakal.comm',
-  phoneDisplay: '00971 2 557 2890',
+  // Corrected to the company's real address (was a typo: innfo@….comm).
+  email: 'info@wadinushakal.com',
+  phoneDisplay: '+971 2 557 2890',
   phoneHref: 'tel:+97125572890',
   address: {
     full: 'Abu Dhabi, Al Dhafra, Beda Zayed Industrial Area, Near Big Mart, No. A11',
@@ -87,16 +87,16 @@ export const fleet = [
     title: 'Cargo Trucks',
     text: 'Well-maintained trucks for moving cargo securely by road.',
     image: 'fleet-cargo',
-    alt: 'Truck leading traffic on a highway through desert mountains',
-    focus: '22% 70%', // where the vehicle sits in the photo, so the narrow desktop cards keep it in view
+    alt: 'Articulated truck and trailer on an open road at first light',
+    focus: '58% 62%', // where the vehicle sits in the photo, so the narrow desktop cards keep it in view
   },
   {
     id: 'heavy-vehicles',
     title: 'Heavy Transport Vehicles',
     text: 'Heavy-duty vehicles suited to larger and more demanding loads.',
     image: 'fleet-heavy',
-    alt: 'Tanker truck on a desert road beside rocky hills',
-    focus: '66% 60%',
+    alt: 'Heavy truck hauling two loaded trailers on a desert road',
+    focus: '48% 52%',
   },
   {
     id: 'commercial-vehicles',

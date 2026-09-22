@@ -10,8 +10,12 @@ Replace with the company's own fleet photography when available.
 - service-general.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/Hk0oOoaCf7Y)
 - service-commercial.jpg — Photo by @rcastro40 on Unsplash (https://unsplash.com/photos/RwO3Atn-RbQ)
 - service-local.jpg (UAE highway) — Photo by @msa_ae on Unsplash (https://unsplash.com/photos/MopMPlA1mf4)
-- fleet-cargo.jpg — Photo by @aban_pics on Unsplash (https://unsplash.com/photos/s3xgOyWfRsA)
-- fleet-heavy.jpg — Photo by @alireza_hashemi on Unsplash (https://unsplash.com/photos/D_nWwfbSNH8)
+- fleet-cargo.jpg (articulated truck and trailer on an open road) — Photo by @sanderyigin on Unsplash
+  (https://unsplash.com/photos/black-truck-on-road-during-daytime-ki19VJAGh6w). Replaced the previous shot,
+  which carried a clearly foreign (Iranian) number plate and local signage.
+- fleet-heavy.jpg (heavy truck hauling two loaded trailers on a desert road) — Photo by @levimeirclancy on
+  Unsplash (https://unsplash.com/photos/white-and-black-truck-on-road-during-daytime-i7-s2wuykiU). Replaced
+  the previous tanker shot for the same reason.
 - fleet-commercial.jpg — Photo by @nxvision on Unsplash (https://unsplash.com/photos/GOD2mDNujuU)
 - fleet-logistics.jpg — Photo by @portcalls on Unsplash (https://unsplash.com/photos/JZ0IIWzB52c)
 - hero-logistics.jpg (heavy cargo truck under a flyover with a freight aircraft overhead and stacked containers
