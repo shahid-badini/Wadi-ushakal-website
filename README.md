@@ -38,8 +38,8 @@ cPanel/Apache, Nginx, S3…). The contact page is a real file at `contact/index.
 
 ## Before launch
 
-1. ~~Verify the email address~~ Confirmed as supplied (`innfo@wadinushakal.comm`). If it changes, update it in
-   `src/data/site.js` and in the JSON-LD block of `index.html`.
+1. ~~Verify the email address~~ Corrected to `info@wadinushakal.com` (the supplied copy had a typo). If it
+   changes, update it in `src/data/site.js` and in the JSON-LD block of `index.html`.
 2. ~~Set the domain~~ Set to `https://wadinushakal.com` in `.env` (`VITE_SITE_URL`), used for the canonical links and
    social-share previews.
 3. **Replace stock photos** with the company's own fleet photography when available (see *Images*).
